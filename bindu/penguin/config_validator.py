@@ -5,9 +5,6 @@ This module provides utilities to validate and process agent configurations,
 ensuring they meet the required schema and have proper defaults.
 """
 
-
-
-
 import os
 from typing import Any, Dict
 
@@ -58,10 +55,7 @@ class ConfigValidator:
 
     @classmethod
     def validate_and_process(cls, config: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Validate and process agent configuration.
-        """
-
+        """Validate and process agent configuration."""
         # 🔥 Validate required fields first (fail-fast)
         cls._validate_required_fields(config)
 
@@ -86,7 +80,6 @@ class ConfigValidator:
     @classmethod
     def _validate_required_fields(cls, config: Dict[str, Any]) -> None:
         """Validate required fields including nested fields."""
-
         missing = []
 
         for field in cls.REQUIRED_FIELDS:
@@ -235,10 +228,12 @@ class ConfigValidator:
 
     @classmethod
     def create_bindufy_config(cls, raw_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Create bindufy configuration from raw config."""
         return cls.validate_and_process(raw_config)
 
 
 def load_and_validate_config(config_path: str) -> Dict[str, Any]:
+    """Load and validate configuration from file path."""
     import json
 
     if not os.path.isabs(config_path):

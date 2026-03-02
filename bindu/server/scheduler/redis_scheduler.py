@@ -306,6 +306,6 @@ class RedisScheduler(Scheduler):
                 return False
             await self._redis_client.ping()
             return True
-        except redis.RedisError as e:
+        except (redis.RedisError, ConnectionError, TimeoutError, Exception) as e:
             logger.warning(f"Redis health check failed: {e}")
             return False

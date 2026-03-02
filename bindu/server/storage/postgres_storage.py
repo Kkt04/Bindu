@@ -196,7 +196,7 @@ class PostgresStorage(Storage[ContextT]):
                 + (f" using schema '{self.schema_name}'" if self.schema_name else "")
             )
 
-        except (SQLAlchemyError, OSError) as e:
+        except (SQLAlchemyError, OSError, ConnectionError, Exception) as e:
             logger.error(f"Failed to connect to PostgreSQL: {e}")
             raise ConnectionError(f"Failed to connect to PostgreSQL: {e}") from e
 
