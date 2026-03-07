@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from "svelte";
 	import Modal from "./Modal.svelte";
+	import IconTrash2 from "~icons/lucide/trash-2";
 
 	type FeedbackKind = "success" | "error" | "info";
 
@@ -85,7 +86,21 @@
 	onDestroy(() => {
 		if (feedbackTimeout) clearTimeout(feedbackTimeout);
 	});
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.ctrlKey && event.shiftKey) {
+			if (event.key === "C" && hasContext && onClearContext && !disabled) {
+				event.preventDefault();
+				showConfirm = "context";
+			} else if (event.key === "T" && hasTasks && onClearTasks && !disabled) {
+				event.preventDefault();
+				showConfirm = "tasks";
+			}
+		}
+	}
 </script>
+
+<svelte:window onkeydown={handleKeydown} />
 
 <div class="py-2">
 	<div class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
@@ -127,11 +142,7 @@
 					aria-label="Clear context"
 					onclick={() => (showConfirm = "context")}
 				>
-					<svg viewBox="0 0 20 20" aria-hidden="true" class="size-4" fill="currentColor">
-						<path
-							d="M7 4.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V6h3a.75.75 0 0 1 0 1.5h-.78l-.8 9.02A2.5 2.5 0 0 1 12.93 19H7.07a2.5 2.5 0 0 1-2.49-2.48l-.8-9.02H3a.75.75 0 0 1 0-1.5h3V4.5Zm1.5 1.5h3V5h-3v1Zm-2.19 1.5.77 8.67a1 1 0 0 0 1 .93h4.84a1 1 0 0 0 1-.93l.77-8.67H6.31Z"
-						/>
-					</svg>
+					<IconTrash2 class="size-4" />
 				</button>
 			{/if}
 		</div>
@@ -153,11 +164,7 @@
 					aria-label="Clear tasks"
 					onclick={() => (showConfirm = "tasks")}
 				>
-					<svg viewBox="0 0 20 20" aria-hidden="true" class="size-4" fill="currentColor">
-						<path
-							d="M7 4.5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1V6h3a.75.75 0 0 1 0 1.5h-.78l-.8 9.02A2.5 2.5 0 0 1 12.93 19H7.07a2.5 2.5 0 0 1-2.49-2.48l-.8-9.02H3a.75.75 0 0 1 0-1.5h3V4.5Zm1.5 1.5h3V5h-3v1Zm-2.19 1.5.77 8.67a1 1 0 0 0 1 .93h4.84a1 1 0 0 0 1-.93l.77-8.67H6.31Z"
-						/>
-					</svg>
+					<IconTrash2 class="size-4" />
 				</button>
 			{/if}
 		</div>
