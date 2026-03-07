@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from "svelte";
+	import Modal from "./Modal.svelte";
 
 	type FeedbackKind = "success" | "error" | "info";
 
@@ -29,6 +30,7 @@
 	let isClearing = $state<"context" | "tasks" | null>(null);
 	let feedback = $state<{ kind: FeedbackKind; message: string } | null>(null);
 	let feedbackTimeout: ReturnType<typeof setTimeout> | null = $state(null);
+	let showConfirm = $state<"context" | "tasks" | null>(null);
 
 	const hasContext = $derived(!!contextId);
 	const hasTasks = $derived((taskCount ?? 0) > 0);
@@ -123,7 +125,7 @@
 					type="button"
 					class="mt-0.5 inline-flex items-center rounded p-1 text-gray-400 opacity-0 hover:text-gray-700 focus:opacity-100 focus:outline-none group-hover:opacity-100 dark:text-gray-500 dark:hover:text-gray-200"
 					aria-label="Clear context"
-					onclick={() => void runClear("context")}
+					onclick={() => (showConfirm = "context")}
 				>
 					<svg viewBox="0 0 20 20" aria-hidden="true" class="size-4" fill="currentColor">
 						<path
@@ -149,7 +151,7 @@
 					type="button"
 					class="mt-0.5 inline-flex items-center rounded p-1 text-gray-400 opacity-0 hover:text-gray-700 focus:opacity-100 focus:outline-none group-hover:opacity-100 dark:text-gray-500 dark:hover:text-gray-200"
 					aria-label="Clear tasks"
-					onclick={() => void runClear("tasks")}
+					onclick={() => (showConfirm = "tasks")}
 				>
 					<svg viewBox="0 0 20 20" aria-hidden="true" class="size-4" fill="currentColor">
 						<path
@@ -197,3 +199,40 @@
 	</div>
 
 </div>
+
+{#if showConfirm}
+	<Modal width="max-w-sm" closeOnBackdrop={false} onclose={() => (showConfirm = null)}>
+		<div class="p-4">
+			<h3 class="mb-2 text-base font-semibold text-gray-900 dark:text-gray-100">
+				Clear {showConfirm === "context" ? "Context" : "Tasks"}?
+			</h3>
+			<p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+				{#if showConfirm === "context"}
+					This will clear the current agent context. The conversation history will be lost. This action cannot be undone.
+				{:else}
+					This will clear all tasks. The conversation will continue but task history will be lost. This action cannot be undone.
+				{/if}
+			</p>
+			<div class="flex justify-end gap-2">
+				<button
+					type="button"
+					class="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+					onclick={() => (showConfirm = null)}
+				>
+					Cancel
+				</button>
+				<button
+					type="button"
+					class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+					onclick={() => {
+						const target = showConfirm;
+						showConfirm = null;
+						if (target) void runClear(target);
+					}}
+				>
+					Clear
+				</button>
+			</div>
+		</div>
+	</Modal>
+{/if}
