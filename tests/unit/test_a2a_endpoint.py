@@ -107,6 +107,30 @@ async def test_agent_run_requires_authentication():
 
 
 @pytest.mark.asyncio
+async def test_agent_run_rejects_file_part_missing_text():
+    """Validation should catch file parts that omit the required `text` field."""
+    app = SimpleNamespace(task_manager=DummyTaskManager())
+    app_settings.agent.method_handlers["message/send"] = "send_message"
+
+    message = create_test_message(text="test")
+    # attach an invalid file part without accompanying text
+    message["parts"].append(
+        {"kind": "file", "file": {"bytes": "dGVzdA==", "mimeType": "text/plain", "name": "test.txt"}}
+    )
+    config = {"acceptedOutputModes": ["text/plain"]}
+
+    req = _make_a2a_request("message/send", {"message": message, "configuration": config})
+    resp = await agent_run_endpoint(cast(BinduApplication, app), req)  # type: ignore
+    assert resp.status_code == 400
+    body = json.loads(resp.body)
+    assert "error" in body
+    # validation failure is treated as a JSON parse error (-32700) by
+    # the endpoint wrapper, since the incoming payload couldn't be coerced to
+    # the typed models.
+    assert body["error"]["code"] == -32700
+
+
+@pytest.mark.asyncio
 async def test_agent_run_permission_enforced():
     """If permission checking is enabled, unauthorized scopes should be blocked."""
     app_settings.auth.enabled = True
